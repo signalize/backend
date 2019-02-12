@@ -11,7 +11,8 @@ function findAutoloader($DIR)
     }
     $FILE = $DIR . "/vendor/autoload.php";
     if (file_exists($FILE)) {
-        require($FILE);
+        chdir($DIR);
+        return require($FILE);
     }
     return findAutoloader(dirname($DIR));
 }

@@ -1,11 +1,11 @@
 <?php
+
 namespace Signalize\Service;
 
 use Signalize\Config;
 
 class Manager
 {
-
     private $loaded = false;
     private $services = [];
 
@@ -78,7 +78,7 @@ class Manager
         }
 
         $cmd = str_replace("\\", "\\\\", $service);
-        $pid = exec("php " . __DIR__ . "/service-container.php -s " . $cmd . "  > /dev/null 2>&1 & echo $!;");
+        $pid = exec("php " . dirname(dirname(__DIR__)) . "/cli/service-container.php -s " . $cmd . "  > /dev/null 2>&1 & echo $!;");
 
         sleep(1);
 
@@ -97,12 +97,12 @@ class Manager
         $processes = null;
         exec("ps aux", $processes);
         $processes = array_filter($processes, function ($row) {
-            return strpos($row, __DIR__ . '/service-container.php -s');
+            return strpos($row, dirname(dirname(__DIR__)) . '/cli/service-container.php -s');
         });
 
         $response = [];
         foreach ($processes as $process) {
-            $process = explode(__DIR__ . "/service-container.php -s", $process);
+            $process = explode(dirname(dirname(__DIR__)) . "/cli/service-container.php -s", $process);
             $pid = explode(" ", preg_replace('/\s+/', ' ', $process[0]));
             $response[$pid[1]] = trim($process[1]);
         }
