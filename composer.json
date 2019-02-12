@@ -17,9 +17,10 @@
     "license": [
         "MIT"
     ],
+    "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "master": "1.0.x"
+            "master": "1.0.x-dev"
         }
     }
 }
