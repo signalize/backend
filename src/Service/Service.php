@@ -1,8 +1,8 @@
 <?php
 
-namespace Signalize\Daemon;
+namespace Signalize\Service;
 
-use Signalize\Core\Config;
+use Signalize\Config;
 use WebSocket\Client;
 
 abstract class Service

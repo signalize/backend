@@ -1,6 +1,6 @@
 <?php
 
-namespace Signalize\Daemon;
+namespace Signalize\Service;
 
 abstract class Package
 {

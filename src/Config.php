@@ -1,6 +1,6 @@
 <?php
 
-namespace Signalize\Core;
+namespace Signalize;
 class Config
 {
     static $config;

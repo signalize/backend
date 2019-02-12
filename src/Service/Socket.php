@@ -1,13 +1,13 @@
 <?php
 
-namespace Signalize\Daemon;
+namespace Signalize\Service;
 
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
 use Ratchet\MessageComponentInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
-use Signalize\Core\Config;
+use Signalize\Config;
 
 class Socket implements MessageComponentInterface
 {

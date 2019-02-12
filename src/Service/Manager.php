@@ -1,11 +1,7 @@
 <?php
+namespace Signalize\Service;
 
-namespace Signalize\Daemon;
-
-use Signalize\Core\Config;
-
-chdir(__DIR__);
-require("../vendor/autoload.php");
+use Signalize\Config;
 
 class Manager
 {
@@ -40,7 +36,7 @@ class Manager
 
     private function loadSocket(&$validServices)
     {
-        $service = "\\Signalize\\Daemon\\Socket";
+        $service = "\\Signalize\\Service\\Socket";
         if (class_exists($service)) {
             $this->loadService($service);
             $validServices[] = $service;
@@ -119,5 +115,3 @@ class Manager
         echo "[\033[1;34m" . $pid . "\033[0m]\t\033[1;37m" . $str . "\033[0m" . "\t[\033[" . $color . "m" . $status . "\033[0m]" . PHP_EOL;
     }
 }
-
-return new Manager();

@@ -7,7 +7,7 @@
         }
     ],
     "autoload": {
-        "psr-4": {"Signalize\\": ""}
+        "psr-4": {"Signalize\\": "src/"}
     },
     "require": {
         "cboden/ratchet": "^0.4.1",
