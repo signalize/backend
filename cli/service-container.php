@@ -1,10 +1,5 @@
 <?php
-chdir(__DIR__);
-require("../vendor/autoload.php");
-
-if (php_sapi_name() !== 'cli') {
-    die("This file can only be loaded into a CLI Enviroment!");
-}
+require("cli.php");
 
 $arguments = getopt('s:', ['service:']);
 if (!isset($arguments['s'])) {
