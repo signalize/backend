@@ -1,0 +1,6 @@
+{
+  "name": "P1 Slimme Meter",
+  "services": [
+    "src/Service"
+  ]
+}

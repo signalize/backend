@@ -1,0 +1,18 @@
+{
+    "name": "signalize/signalize",
+    "license": "GNU",
+    "authors": [
+        {
+            "name": "Maikel ten Voorde",
+            "email": "info@signalize.nl"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"Signalize\\": ""}
+    },
+    "require": {
+        "cboden/ratchet": "^0.4.1",
+        "textalk/websocket": "^1.2",
+        "ext-json": "*"
+    }
+}
