@@ -34,16 +34,16 @@ abstract class Base
     }
 
     /**
-     * @param string $service
+     * @param string $command
      * @param string $package
      * @return bool
      */
-    protected function send(string $service, string $package)
+    protected function send(string $command, string $package)
     {
         if (!$this->socket->isConnected()) {
             $this->__construct();
         }
-        $this->socket->send("/" . $this->getChannel() . "\n\n" . $package);
+        $this->socket->send("/" . $command . "\n\n" . $package);
     }
 
 
@@ -60,12 +60,4 @@ abstract class Base
             var_dump($e->getTraceAsString());
         }
     }
-
-
-    private function getChannel()
-    {
-        return 'services/module-p1';
-    }
-
-
 }
