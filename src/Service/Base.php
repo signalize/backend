@@ -13,35 +13,39 @@ abstract class Base
     /** @var Client $socket */
     private $socket;
 
-    abstract protected function worker();
+
+    abstract public function worker();
 
     abstract static function converter(string $data): string;
 
     /**
      * Base constructor.
-     * @param bool $loadSocket
      * @throws \WebSocket\BadOpcodeException
      */
-    public function __construct($loadSocket = true)
+    public function __construct()
     {
-        if ($loadSocket) {
-            $this->connect();
+        $this->socket = new Client('ws://127.0.0.1:' . Config::get('socket')->port);
+        $this->socket->send("/authenticate\n\n" . Socket::token());
+        if (!$this->socket->isConnected()) {
+            throw new \Exception('Not possible to connect to the websocket!');
         }
+
+        $this->worker();
     }
 
     /**
-     * @param \Composer\Script\Event $event
+     * @param string $service
+     * @param string $package
+     * @return bool
      */
-    static public function Work(\Composer\Script\Event $event)
+    protected function send(string $service, string $package)
     {
-        try {
-            $instance = new static();
-            echo $instance->worker();
-        } catch (\Exception $e) {
-            var_dump($e->getMessage());
-            var_dump($e->getTraceAsString());
+        if (!$this->socket->isConnected()) {
+            $this->__construct();
         }
+        $this->socket->send("/" . $this->getChannel() . "\n\n" . $package);
     }
+
 
     /**
      * @param \Composer\Script\Event $event
@@ -57,30 +61,11 @@ abstract class Base
         }
     }
 
-    /**
-     * @param string $service
-     * @param string $package
-     * @return bool
-     */
-    protected function send(string $service, string $package)
+
+    private function getChannel()
     {
-        try {
-            if (!$this->socket || !$this->socket->isConnected()) {
-                $this->connect();
-            }
-            $this->socket->send("/" . $service . "\n\n" . $package);
-            return true;
-        } catch (\Exception $e) {
-            return false;
-        }
+        return 'services/module-p1';
     }
 
-    private function connect()
-    {
-        $this->socket = new Client('ws://127.0.0.1:' . Config::get('socket')->port);
-        $this->socket->send("/authenticate\n\n" . Socket::token());
-        if (!$this->socket->isConnected()) {
-            throw new \Exception('Not possible to connect to the websocket!');
-        }
-    }
+
 }
