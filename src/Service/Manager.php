@@ -44,7 +44,7 @@ class Manager
      */
     private function loadSocket(array &$validServices): void
     {
-        $validServices[] = $this->loadService("\\Signalize\\Socket\\Service");
+        $validServices[] = $this->loadService("service-socket");
     }
 
     private function loadModules(array &$validServices): void
@@ -81,11 +81,8 @@ class Manager
             return $service;
         }
 
-        $cmd = str_replace("\\", "\\\\", $service);
-        $pid = exec("php " . dirname(dirname(__DIR__)) . "/cli/service-container.php -s " . $cmd . "  > /dev/null 2>&1 & echo $!;");
-
+        $pid = exec("php composer.phar exec " . $service . "  > /dev/null 2>&1 & echo $!;");
         sleep(1);
-
         $this->services = $this->loadProcesses();
         if (!array_key_exists($pid, $this->services)) {
             $this->dump('FAIL', $pid, $service, '1;31');
@@ -104,12 +101,12 @@ class Manager
         $processes = null;
         exec("ps aux", $processes);
         $processes = array_filter($processes, function ($row) {
-            return strpos($row, dirname(dirname(__DIR__)) . '/cli/service-container.php -s');
+            return strpos($row, getcwd() . '/composer.phar exec');
         });
 
         $response = [];
         foreach ($processes as $process) {
-            $process = explode(dirname(dirname(__DIR__)) . "/cli/service-container.php -s", $process);
+            $process = explode(getcwd() . '/composer.phar exec', $process);
             $pid = explode(" ", preg_replace('/\s+/', ' ', $process[0]));
             $response[$pid[1]] = trim($process[1]);
         }

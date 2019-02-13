@@ -18,7 +18,7 @@ class Config
     static public function load(callable $function)
     {
         if (!static::$config) {
-            $file = getcwd() . "/config.json";
+            $file = "config.json";
             if (file_exists($file) && $composer = file_get_contents($file)) {
                 static::$config = json_decode($composer);
             }
