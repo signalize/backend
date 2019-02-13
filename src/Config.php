@@ -3,14 +3,19 @@
 namespace Signalize;
 class Config
 {
+    /** @var null|object */
     static $config = null;
 
-    static public function clear()
+    static public function clear(): void
     {
         self::$config = null;
     }
 
-    static public function load($function)
+    /**
+     * @param callable $function
+     * @return mixed
+     */
+    static public function load(callable $function)
     {
         if (!static::$config) {
             $file = getcwd() . "/config.json";
@@ -21,14 +26,21 @@ class Config
         return $function(static::$config);
     }
 
-    static public function get($property)
+    /**
+     * @param string $property
+     * @return mixed
+     */
+    static public function get(string $property)
     {
         return static::load(function ($config) use ($property) {
             return $config->{$property};
         });
     }
 
-    static public function modules()
+    /**
+     * @return array
+     */
+    static public function modules(): array
     {
         return [];
     }

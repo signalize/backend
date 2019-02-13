@@ -20,6 +20,7 @@
     "MIT"
   ],
   "bin": [
-    "cli/service-manager"
+    "cli/service-manager",
+    "cli/service-socket"
   ]
 }

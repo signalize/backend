@@ -6,9 +6,14 @@ use Signalize\Config;
 
 class Manager
 {
+    /** @var bool $loaded */
     private $loaded = false;
+    /** @var array<string> */
     private $services = [];
 
+    /**
+     * Manager constructor.
+     */
     public function __construct()
     {
         // Kill All Open Services
@@ -34,21 +39,23 @@ class Manager
         }
     }
 
-    private function loadSocket(&$validServices)
+    /**
+     * @param array $validServices
+     */
+    private function loadSocket(array &$validServices): void
     {
-        $service = "\\Signalize\\Service\\Socket";
-        if (class_exists($service)) {
-            $this->loadService($service);
-            $validServices[] = $service;
-        }
+        $validServices[] = $this->loadService("\\Signalize\\Socket\\Service");
     }
 
-    private function loadModules(&$validServices)
+    private function loadModules(array &$validServices): void
     {
 
     }
 
-    private function validateServices(&$validServices)
+    /**
+     * @param array $validServices
+     */
+    private function validateServices(array &$validServices): void
     {
         $offset = 0;
         foreach ($this->services as $pid => $service) {
@@ -64,8 +71,11 @@ class Manager
         }
     }
 
-
-    private function loadService($service)
+    /**
+     * @param string $service
+     * @return string
+     */
+    private function loadService(string $service): string
     {
         if (in_array($service, $this->services)) {
             return $service;
@@ -86,7 +96,10 @@ class Manager
         return $service;
     }
 
-    private function loadProcesses()
+    /**
+     * @return array
+     */
+    private function loadProcesses(): array
     {
         $processes = null;
         exec("ps aux", $processes);
@@ -104,7 +117,13 @@ class Manager
         return $response;
     }
 
-    protected function dump($status, $pid, $str, $color = 0)
+    /**
+     * @param string $status
+     * @param string $pid
+     * @param string $str
+     * @param string $color
+     */
+    protected function dump(string $status, string $pid, string $str, string $color = '0')
     {
         echo "[\033[1;34m" . $pid . "\033[0m]\t\033[1;37m" . $str . "\033[0m" . "\t[\033[" . $color . "m" . $status . "\033[0m]" . PHP_EOL;
     }

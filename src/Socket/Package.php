@@ -1,6 +1,6 @@
 <?php
 
-namespace Signalize\Service;
+namespace Signalize\Socket;
 
 abstract class Package
 {
