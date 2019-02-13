@@ -20,6 +20,6 @@
     "MIT"
   ],
   "bin": [
-    "php cli/service-manager.php"
+    "cli/service-manager"
   ]
 }
