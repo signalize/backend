@@ -45,13 +45,7 @@ class Manager
 
     private function loadModules(&$validServices)
     {
-        foreach (Config::get('modules') as $module => $options) {
-            $service = "\\Signalize\\Modules\\" . $module . "\\Service";
-            if (class_exists($service)) {
-                $this->loadService($service);
-                $validServices[] = $service;
-            }
-        }
+
     }
 
     private function validateServices(&$validServices)

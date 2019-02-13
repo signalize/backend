@@ -1,20 +1,25 @@
 {
-    "name": "signalize/signalize",
-    "authors": [
-        {
-            "name": "Signalize",
-            "email": "info@signalize.nl"
-        }
-    ],
-    "autoload": {
-        "psr-4": {"Signalize\\": "src/"}
-    },
-    "require": {
-        "cboden/ratchet": "^0.4.1",
-        "textalk/websocket": "^1.2",
-        "ext-json": "*"
-    },
-    "license": [
-        "MIT"
-    ]
+  "name": "signalize/signalize",
+  "authors": [
+    {
+      "name": "Signalize",
+      "email": "info@signalize.nl"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Signalize\\": "src/"
+    }
+  },
+  "require": {
+    "cboden/ratchet": "^0.4.1",
+    "textalk/websocket": "^1.2",
+    "ext-json": "*"
+  },
+  "license": [
+    "MIT"
+  ],
+  "bin": [
+    "php cli/service-manager.php"
+  ]
 }

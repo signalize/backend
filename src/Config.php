@@ -3,21 +3,33 @@
 namespace Signalize;
 class Config
 {
-    static $config;
+    static $config = null;
 
     static public function clear()
     {
-        self::$config = false;
+        self::$config = null;
+    }
+
+    static public function load($function)
+    {
+        if (!static::$config) {
+            $file = getcwd() . "/config.json";
+            if (file_exists($file) && $composer = file_get_contents($file)) {
+                static::$config = json_decode($composer);
+            }
+        }
+        return $function(static::$config);
     }
 
     static public function get($property)
     {
-        if (!self::$config) {
-            $file = dirname(getcwd()) . "/config.json";
-            if (file_exists($file) && $config = file_get_contents($file)) {
-                self::$config = json_decode($config);
-            }
-        }
-        return self::$config->{$property};
+        return static::load(function ($config) use ($property) {
+            return $config->{$property};
+        });
+    }
+
+    static public function modules()
+    {
+        return [];
     }
 }

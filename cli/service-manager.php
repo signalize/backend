@@ -1,9 +1,6 @@
 <?php
-
-namespace Signalize\Signalize\cli;
+require("cli.php");
 
 use Signalize\Service\Manager;
-
-require("cli.php");
 
 return new Manager();
