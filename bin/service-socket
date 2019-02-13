@@ -12,4 +12,6 @@ if (!file_exists("composer.json")) {
 
 /** @noinspection PhpIncludeInspection */
 require("vendor/autoload.php");
-return new Signalize\Service\Manager();
+
+$port = \Signalize\Config::get('socket')->port;
+return new \Signalize\Socket\Socket($port);

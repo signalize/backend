@@ -2,6 +2,8 @@
 
 namespace Signalize\Service;
 
+use Signalize\Config;
+
 class Manager
 {
     /** @var bool $loaded */
@@ -36,12 +38,14 @@ class Manager
 
     private function loadServices()
     {
-        exec("php composer.phar run-script --list", $services);
+        exec("php composer.phar exec --list", $services);
         $services = array_filter($services, function ($row) {
-            return strpos($row, 'signalize-');
+            return substr($row, 0, 1) === '-' && strpos($row, 'service-') && !strpos($row, 'service-manager');
         });
+
         foreach ($services as $service) {
-            $this->loadService(trim($service));
+            $service = str_replace("- ", "", $service);
+            $this->loadService($service);
         }
     }
 
@@ -88,11 +92,11 @@ class Manager
         $processes = null;
         exec("ps aux | grep php", $processes);
         $processes = array_filter($processes, function ($row) {
-            return strpos($row, 'run-script signalize-');
+            return strpos($row, 'vendor/bin/') && !strpos($row, 'vendor/bin/service-manager');
         });
         $response = [];
         foreach ($processes as $process) {
-            $process = explode('run-script', $process);
+            $process = explode('vendor/bin/', $process);
             $pid = explode(" ", preg_replace('/\s+/', ' ', $process[0]));
             $response[$pid[1]] = trim($process[1]);
         }
