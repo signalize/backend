@@ -20,7 +20,11 @@
     "MIT"
   ],
   "bin": [
-    "cli/service-manager",
-    "cli/service-socket"
-  ]
+    "bin/service-manager"
+  ],
+  "scripts": {
+    "signalize-socket": [
+      "\\Signalize\\Socket\\Service::Work"
+    ]
+  }
 }

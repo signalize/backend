@@ -7,9 +7,8 @@ use Ratchet\Http\HttpServer;
 use Ratchet\MessageComponentInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
-use Signalize\Config;
 
-class Service implements MessageComponentInterface
+class Socket implements MessageComponentInterface
 {
     /** @var \SplObjectStorage<Connection> */
     private $connections;
@@ -17,7 +16,7 @@ class Service implements MessageComponentInterface
     /**
      * Service constructor.
      */
-    public function __construct()
+    public function __construct($port)
     {
         $this->connections = new \SplObjectStorage;
         $server = IoServer::factory(
@@ -26,7 +25,7 @@ class Service implements MessageComponentInterface
                     $this
                 )
             ),
-            Config::get('socket')->port
+            $port
         );
         $server->run();
     }
@@ -44,30 +43,49 @@ class Service implements MessageComponentInterface
     /**
      * @param ConnectionInterface $conn
      * @param string $msg
+     * @return bool
      */
     public function onMessage(ConnectionInterface $conn, $msg)
     {
-        if ($connection = $this->getConnection($conn)) {
-            if (substr($msg, 0, 8) === 'LOGIN:') {
-                $token = substr($msg, 8);
-                if ($token !== self::token()) {
-                    $connection->close();
-                }
-                $connection->authorize(true);
-                return;
-            }
+        # Get current connection
+        if (!$connection = $this->getConnection($conn)) {
+            return false;
+        }
 
-            if ($connection->authorized()) {
-                echo "Message: " . $msg . PHP_EOL;
+        # Validate the received package structure
+        if (!$service = trim(substr($msg, 1, strpos($msg, "\n\n")))) {
+            return false;
+        }
 
-                /** @var Connection $connection */
-                foreach ($this->connections as $c) {
-                    if ($c->authorized() && !$c->isConnection($conn)) {
-                        $c->send($msg);
-                    }
-                }
+        # Check or service is valid
+        if (substr($service, 0, 9) !== 'services/') {
+            return false;
+        }
+        $package = trim(substr($msg, strpos($msg, "\n\n")));
+
+        # Process the login Command
+        if (substr($msg, 0, 13) === '/authenticate') {
+            return $this->authenticate($connection, $package);
+        }
+
+        # Check or user is authorized to execute a command
+        if (!$connection->authorized()) {
+            return false;
+        }
+
+        # Execute script
+        exec("composer run-script " . $service . " " . base64_encode($package), $response);
+        if (!$response = join(PHP_EOL, $response)) {
+            return false;
+        }
+
+        # Send data to all the open connections
+        foreach ($this->connections as $c) {
+            if ($c->authorized()) {
+                $c->send($response);
             }
         }
+        return true;
     }
 
     /**
@@ -107,6 +125,18 @@ class Service implements MessageComponentInterface
         return null;
     }
 
+    protected function authenticate(Connection $connection, $package): bool
+    {
+        if (!self::tokenValid($package)) {
+            $connection->close();
+            return false;
+        }
+        $this->dump('- Authenticated :)', '1;32');
+        $connection->authorize(true);
+        return true;
+    }
+
+
     /**
      * @param string $str
      * @param string $color
@@ -121,6 +151,11 @@ class Service implements MessageComponentInterface
      */
     static public function token(): string
     {
-        return Config::get('socket')->security;
+        return '0000';//Config::get('socket')->security;
+    }
+
+    static public function tokenValid(string $token): bool
+    {
+        return $token === self::token();
     }
 }
