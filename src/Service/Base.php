@@ -27,7 +27,7 @@ abstract class Base
      * @param Package $package
      * @throws \Exception
      */
-    protected function update(Package $package): void
+    protected function update(Package $package)
     {
         if (!$this->socket->isConnected()) {
             $this->__construct();

@@ -40,7 +40,7 @@ class Connection
     /**
      * @param bool $value
      */
-    public function authorize(bool $value): void
+    public function authorize(bool $value)
     {
         $this->authorized = $value;
     }
@@ -48,7 +48,7 @@ class Connection
     /**
      * @param string $data
      */
-    public function send(string $data): void
+    public function send(string $data)
     {
         try {
             $this->connection->send($data);
@@ -56,7 +56,7 @@ class Connection
         }
     }
 
-    public function close(): void
+    public function close()
     {
         $this->connection->close();
     }

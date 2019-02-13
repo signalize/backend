@@ -6,7 +6,7 @@ class Config
     /** @var null|object */
     static $config = null;
 
-    static public function clear(): void
+    static public function clear()
     {
         self::$config = null;
     }

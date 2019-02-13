@@ -42,12 +42,12 @@ class Manager
     /**
      * @param array $validServices
      */
-    private function loadSocket(array &$validServices): void
+    private function loadSocket(array &$validServices)
     {
         $validServices[] = $this->loadService("service-socket");
     }
 
-    private function loadModules(array &$validServices): void
+    private function loadModules(array &$validServices)
     {
 
     }
@@ -55,7 +55,7 @@ class Manager
     /**
      * @param array $validServices
      */
-    private function validateServices(array &$validServices): void
+    private function validateServices(array &$validServices)
     {
         $offset = 0;
         foreach ($this->services as $pid => $service) {

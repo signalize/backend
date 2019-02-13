@@ -34,7 +34,7 @@ class Service implements MessageComponentInterface
     /**
      * @param ConnectionInterface $conn
      */
-    public function onOpen(ConnectionInterface $conn): void
+    public function onOpen(ConnectionInterface $conn)
     {
         $connection = new Connection($conn);
         $this->connections->attach($connection);
@@ -45,7 +45,7 @@ class Service implements MessageComponentInterface
      * @param ConnectionInterface $conn
      * @param string $msg
      */
-    public function onMessage(ConnectionInterface $conn, $msg): void
+    public function onMessage(ConnectionInterface $conn, $msg)
     {
         if ($connection = $this->getConnection($conn)) {
             if (substr($msg, 0, 8) === 'LOGIN:') {
@@ -74,7 +74,7 @@ class Service implements MessageComponentInterface
      * @param ConnectionInterface $conn
      * @param \Exception $e
      */
-    public function onError(ConnectionInterface $conn, \Exception $e): void
+    public function onError(ConnectionInterface $conn, \Exception $e)
     {
         //
     }
@@ -82,7 +82,7 @@ class Service implements MessageComponentInterface
     /**
      * @param ConnectionInterface $conn
      */
-    public function onClose(ConnectionInterface $conn): void
+    public function onClose(ConnectionInterface $conn)
     {
         foreach ($this->connections as $connection) {
             if ($connection->isConnection($conn)) {
@@ -111,7 +111,7 @@ class Service implements MessageComponentInterface
      * @param string $str
      * @param string $color
      */
-    private function dump(string $str, string $color = '0'): void
+    private function dump(string $str, string $color = '0')
     {
         echo "\033[" . $color . "m" . $str . "\033[0m" . PHP_EOL;
     }
