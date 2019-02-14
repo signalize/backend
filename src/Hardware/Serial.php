@@ -2,6 +2,8 @@
 
 namespace Signalize\Hardware;
 
+use Signalize\Service\Package;
+
 abstract class Serial
 {
     private $fp;
@@ -37,6 +39,7 @@ abstract class Serial
                 $buffer .= $chuck;
                 if ($package = $this->process($chuck, trim($buffer))) {
                     if (is_a($package, Package::class)) {
+                        /** @var Package $package */
                         $method($package);
                     }
                 } else {

@@ -63,14 +63,10 @@ abstract class Base
      * @param mixed $package
      * @return bool
      */
-    protected function send($package)
+    protected function send(Package $package)
     {
         if (!$this->socket->isConnected()) {
             $this->__construct();
-        }
-
-        if (is_array($package) || is_object($package)) {
-            $package = json_encode($package);
         }
 
         $this->socket->send("/" . basename($_SERVER['SCRIPT_NAME']) . "\n\n" . $package);

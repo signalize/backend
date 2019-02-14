@@ -1,6 +1,6 @@
 <?php
 
-namespace Signalize\Hardware;
+namespace Signalize\Service;
 
 abstract class Package
 {
