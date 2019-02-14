@@ -56,11 +56,6 @@ class Socket implements MessageComponentInterface
         if (!$service = trim(substr($msg, 1, strpos($msg, "\n\n")))) {
             return false;
         }
-
-        # Check or service is valid
-        if (substr($service, 0, 9) !== 'services/') {
-            return false;
-        }
         $package = trim(substr($msg, strpos($msg, "\n\n")));
 
         # Process the login Command
@@ -73,11 +68,14 @@ class Socket implements MessageComponentInterface
             return false;
         }
 
-        # Execute script
-        exec("composer run-script " . $service . " " . base64_encode($package), $response);
-        if (!$response = join(PHP_EOL, $response)) {
+        # Check or service is valid
+        if (substr($service, 0, 9) !== 'services/') {
             return false;
         }
+
+        # Execute script
+        $response = $package;
+//        $pid = exec("vendor/bin/" . $service . " " . base64_encode($package) . "  > /dev/null 2>&1 & echo $!;");
 
         # Send data to all the open connections
         foreach ($this->connections as $c) {
