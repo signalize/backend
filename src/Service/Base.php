@@ -14,8 +14,15 @@ abstract class Base
     private $socket;
 
 
+    /**
+     * @return void
+     */
     abstract public function worker();
 
+    /**
+     * @param string $data
+     * @return void
+     */
     abstract function execute(string $data);
 
     /**

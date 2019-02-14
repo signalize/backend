@@ -8,16 +8,28 @@ abstract class Serial
     private $size;
 
 
-    abstract function process($chuck, $buffer): Package;
-
-
-    public function __construct($device, $size)
+    /**
+     * @param string $chuck
+     * @param string $buffer
+     * @return Package
+     */
+    abstract function process(string $chuck, string $buffer): \Signalize\Hardware\Package;
+    
+    /**
+     * Serial constructor.
+     * @param string $device
+     * @param int $size
+     */
+    public function __construct(string $device, int $size)
     {
         $this->fp = fopen($device, "r+");
         $this->size = $size;
     }
 
-    public function subscribe($method)
+    /**
+     * @param callable $method
+     */
+    public function subscribe(callable $method)
     {
         $buffer = null;
         while ($chuck = fgets($this->fp, $this->size)) {
@@ -33,6 +45,7 @@ abstract class Serial
             }
         }
     }
+
 
     public function __destruct()
     {
