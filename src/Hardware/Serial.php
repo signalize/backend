@@ -11,10 +11,10 @@ abstract class Serial
     /**
      * @param string $chuck
      * @param string $buffer
-     * @return Package
+     * @return Package|bool
      */
-    abstract function process(string $chuck, string $buffer): \Signalize\Hardware\Package;
-    
+    abstract function process(string $chuck, string $buffer);
+
     /**
      * Serial constructor.
      * @param string $device
