@@ -35,8 +35,12 @@ class Manager
         }
     }
 
+    /**
+     * Load all the Composer Bin Services
+     */
     private function loadServices()
     {
+        # Receive list of available service binary's
         exec("php composer.phar exec --list", $services);
         $services = array_filter($services, function ($row) {
             return (substr($row, 0, 1) === '-' && strpos($row, 'service-')) &&

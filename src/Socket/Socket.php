@@ -35,11 +35,12 @@ class Socket implements MessageComponentInterface
     /**
      * @param ConnectionInterface $conn
      */
-    public function onOpen(ConnectionInterface $conn)
+    public function onOpen(ConnectionInterface $conn): bool
     {
         $connection = new Connection($conn);
         $this->connections->attach($connection);
         $this->dump('Connection Established.', '1;32');
+        return true;
     }
 
     /**
@@ -47,7 +48,7 @@ class Socket implements MessageComponentInterface
      * @param string $msg
      * @return bool
      */
-    public function onMessage(ConnectionInterface $conn, $msg)
+    public function onMessage(ConnectionInterface $conn, $msg): bool
     {
         # Get current connection
         if (!$connection = $this->getConnection($conn)) {
@@ -55,14 +56,13 @@ class Socket implements MessageComponentInterface
         }
 
         # Validate the received package structure
-        if (!$service = trim(substr($msg, 1, strpos($msg, "\n\n")))) {
+        if (!$msg = $this->decode($msg)) {
             return false;
         }
-        $package = trim(substr($msg, strpos($msg, "\n\n")));
 
         # Process the login Command
-        if (substr($msg, 0, 13) === '/authenticate') {
-            return $this->authenticate($connection, $package);
+        if ($msg['service'] === 'authenticate') {
+            return $this->authenticate($connection, $msg['package']);
         }
 
         # Check or user is authorized to execute a command
@@ -71,16 +71,16 @@ class Socket implements MessageComponentInterface
         }
 
         # Check or service is valid
-        if (in_array($service, ['service-socket', 'service-manager'])) {
+        if (in_array($msg['service'], ['service-socket', 'service-manager'])) {
             return false;
         }
 
         # Execute script
-        if (strpos($service, 'execute:') !== false) {
-            $service = substr($service, strpos($service, ':') + 1);
+        if (strpos($msg['service'], 'execute:') !== false) {
+            $service = substr($msg['service'], strpos($msg['service'], ':') + 1);
             if (file_exists("vendor/bin/" . $service)) {
                 $this->dump('Execute command: ' . $service, '1;32');
-                exec("vendor/bin/" . $service . " --data=" . base64_encode($package) . " > /dev/null 2>&1 & echo $!;");
+                exec("vendor/bin/" . $service . " --data=" . base64_encode($msg['package']) . " > /dev/null 2>&1 & echo $!;");
                 return true;
             }
         }
@@ -88,7 +88,7 @@ class Socket implements MessageComponentInterface
         /** @var Connection $c */
         foreach ($this->connections as $c) {
             if ($c->authorized()) {
-                $c->send($package);
+                $c->send($msg['service'], $msg['package']);
             }
         }
 
@@ -100,7 +100,7 @@ class Socket implements MessageComponentInterface
      * @param ConnectionInterface $conn
      * @param \Exception $e
      */
-    public function onError(ConnectionInterface $conn, \Exception $e)
+    public function onError(ConnectionInterface $conn, \Exception $e): bool
     {
         //
     }
@@ -108,14 +108,16 @@ class Socket implements MessageComponentInterface
     /**
      * @param ConnectionInterface $conn
      */
-    public function onClose(ConnectionInterface $conn)
+    public function onClose(ConnectionInterface $conn): bool
     {
         foreach ($this->connections as $connection) {
             if ($connection->isConnection($conn)) {
                 $this->connections->detach($connection);
+                $this->dump('Connection Closed.', '1;31');
+                return true;
             }
         }
-        $this->dump('Connection Closed.', '1;31');
+        return false;
     }
 
     /**
@@ -133,17 +135,40 @@ class Socket implements MessageComponentInterface
         return null;
     }
 
-    protected function authenticate(Connection $connection, $package): bool
+    /**
+     * @param string $msg
+     * @return array|bool
+     */
+    private function decode(string $msg)
     {
-        if (!self::tokenValid($package)) {
+        $seperator = (strpos($msg, "\r\n\r\n") ? "\r\n\r\n" : "\n\n");
+        if (strpos($msg, $seperator) && strpos($msg, $seperator) < 32) {
+            return [
+                'service' => trim(substr($msg, 1, strpos($msg, $seperator))),
+                'package' => trim(substr($msg, strpos($msg, $seperator)))
+            ];
+        }
+        return false;
+    }
+
+    /**
+     * @param Connection $connection
+     * @param string $token
+     * @return bool
+     */
+    protected function authenticate(Connection $connection, string $token): bool
+    {
+        if (!self::tokenValid($token)) {
+            $connection->send('authenticate', "401 Unauthorized");
             $connection->close();
             return false;
         }
         $this->dump('- Authenticated :)', '1;32');
         $connection->authorize(true);
+        $connection->send('authenticate', "200 Authentication completed");
+
         return true;
     }
-
 
     /**
      * @param string $str
@@ -159,18 +184,29 @@ class Socket implements MessageComponentInterface
      */
     static public function token(): string
     {
-        return Config::get('socket')->security;
+        return md5(date("Ymd") . Config::get('socket')->security);
     }
 
+    /**
+     * @param string $token
+     * @return bool
+     */
     static public function tokenValid(string $token): bool
     {
-        switch (true) {
-            case $token === self::token():
-                return true;
-            case $token === "MyLogin":
-                return true;
-            default:
-                return false;
+        # Check token is device
+        if ($token === self::token()) {
+            return true;
         }
+
+        # Check token is a valid credential
+        if ($credentials = Config::get('credentials')) {
+            foreach ($credentials as $credential) {
+                if ($token === md5(date("Ymd") . ":" . $credential->username . ":" . $credential->password)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

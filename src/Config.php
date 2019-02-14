@@ -33,7 +33,10 @@ class Config
     static public function get(string $property)
     {
         return static::load(function ($config) use ($property) {
-            return $config->{$property};
+            if (isset($config->{$property})) {
+                return $config->{$property};
+            }
+            return false;
         });
     }
 

@@ -48,10 +48,13 @@ class Connection
     /**
      * @param string $data
      */
-    public function send(string $data)
+    public function send(string $service, $data)
     {
         try {
-            $this->connection->send($data);
+            if (is_object($data) || is_array($data)) {
+                $data = json_encode($data);
+            }
+            $this->connection->send("/" . $service . "\r\n\r\n" . $data);
         } catch (\Exception $e) {
         }
     }
