@@ -2,8 +2,6 @@
 
 namespace Signalize\Hardware;
 
-use Signalize\Daemon\Package;
-
 abstract class Serial
 {
     private $fp;
