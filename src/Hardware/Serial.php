@@ -9,16 +9,15 @@ abstract class Serial
     private $fp;
     private $size;
 
+
+    abstract function process($chuck, $buffer): Package;
+
+
     public function __construct($device, $size)
     {
         $this->fp = fopen($device, "r+");
         $this->size = $size;
     }
-
-    abstract function
-
-
-    process($chuck, $buffer);
 
     public function subscribe($method)
     {
