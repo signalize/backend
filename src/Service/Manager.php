@@ -29,7 +29,6 @@ class Manager
             }
 
             $this->loadServices();
-            $this->validateServices();
 
             $this->loaded = true;
             sleep(10);
@@ -40,25 +39,15 @@ class Manager
     {
         exec("php composer.phar exec --list", $services);
         $services = array_filter($services, function ($row) {
-            return substr($row, 0, 1) === '-' && strpos($row, 'service-') && !strpos($row, 'service-manager');
+            return (substr($row, 0, 1) === '-' && strpos($row, 'service-')) &&
+                (!strpos($row, 'service-manager')) &&
+                (!strpos($row, 'service-socket'));
         });
 
+        array_unshift($services, "service-socket");
         foreach ($services as $service) {
             $service = str_replace("- ", "", $service);
             $this->loadService($service);
-        }
-    }
-
-    private function validateServices()
-    {
-        $offset = 0;
-        foreach ($this->services as $pid => $service) {
-            if (count(array_keys($this->services, $service)) > 1) {
-                $this->dump('DUPLICATE', $pid, $service . "\t\t", '1;31');
-                exec("kill -9 " . $pid . " > /dev/null 2>&1");
-                unset($this->services[$pid]);
-            }
-            $offset++;
         }
     }
 
@@ -72,13 +61,20 @@ class Manager
             return $service;
         }
 
-        $pid = exec("vendor/bin/" . $service . "  > /dev/null 2>&1 & echo $!;");
+        $pid = exec("vendor/bin/" . $service . " --worker > /dev/null 2>&1 & echo $!;");
         sleep(1);
         $this->services = $this->loadProcesses();
+
+
+        $msg = $service . "\t";
+        if (strlen($msg) < 16) {
+            $msg .= "\t";
+        }
+
         if (!array_key_exists($pid, $this->services)) {
-            $this->dump('FAIL', $pid, $service . "\t\t", '1;31');
+            $this->dump('FAIL', $pid, $msg, '1;31');
         } else {
-            $this->dump('RUNNING', $pid, $service . "\t\t", '1;32');
+            $this->dump('RUNNING', $pid, $msg, '1;32');
         }
 
         return $service;
@@ -98,7 +94,8 @@ class Manager
         foreach ($processes as $process) {
             $process = explode('vendor/bin/', $process);
             $pid = explode(" ", preg_replace('/\s+/', ' ', $process[0]));
-            $response[$pid[1]] = trim($process[1]);
+            $service = explode(" ", $process[1]);
+            $response[$pid[1]] = trim($service[0]);
         }
         ksort($response);
         return $response;

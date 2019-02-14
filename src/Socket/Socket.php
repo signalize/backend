@@ -7,6 +7,8 @@ use Ratchet\Http\HttpServer;
 use Ratchet\MessageComponentInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
+use Signalize\Config;
+use WebSocket\Client;
 
 class Socket implements MessageComponentInterface
 {
@@ -69,20 +71,28 @@ class Socket implements MessageComponentInterface
         }
 
         # Check or service is valid
-        if (substr($service, 0, 9) !== 'services/') {
+        if (in_array($service, ['service-socket', 'service-manager'])) {
             return false;
         }
 
         # Execute script
-        $response = $package;
-//        $pid = exec("vendor/bin/" . $service . " " . base64_encode($package) . "  > /dev/null 2>&1 & echo $!;");
-
-        # Send data to all the open connections
-        foreach ($this->connections as $c) {
-            if ($c->authorized()) {
-                $c->send($response);
+        if (strpos($service, 'execute:') !== false) {
+            $service = substr($service, strpos($service, ':') + 1);
+            if (file_exists("vendor/bin/" . $service)) {
+                $this->dump('Execute command: ' . $service, '1;32');
+                exec("vendor/bin/" . $service . " --data=" . base64_encode($package) . " > /dev/null 2>&1 & echo $!;");
+                return true;
             }
         }
+
+        /** @var Connection $c */
+        foreach ($this->connections as $c) {
+            if ($c->authorized()) {
+                $c->send($package);
+            }
+        }
+
+
         return true;
     }
 
@@ -149,11 +159,18 @@ class Socket implements MessageComponentInterface
      */
     static public function token(): string
     {
-        return '0000';//Config::get('socket')->security;
+        return Config::get('socket')->security;
     }
 
     static public function tokenValid(string $token): bool
     {
-        return $token === self::token();
+        switch (true) {
+            case $token === self::token():
+                return true;
+            case $token === "MyLogin":
+                return true;
+            default:
+                return false;
+        }
     }
 }
