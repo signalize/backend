@@ -44,7 +44,7 @@ class Connection
     /**
      * @param Message $message
      */
-    public function send(Message $message): void
+    public function send(Message $message)
     {
         $this->connection->send($message);
     }
@@ -52,7 +52,7 @@ class Connection
     /**
      *
      */
-    public function close(): void
+    public function close()
     {
         $this->connection->close();
     }

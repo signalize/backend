@@ -2,6 +2,11 @@
 
 namespace Signalize\Socket;
 
+/**
+ * Class Package
+ * @package Signalize\Socket
+ * @author Maikel ten Voorde <info@signalize.nl>
+ */
 class Package extends \ArrayIterator
 {
     /**
