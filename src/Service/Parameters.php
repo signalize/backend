@@ -21,7 +21,7 @@ class Parameters extends \ArrayIterator
         foreach ($arguments as $argument) {
             if (substr($argument, 0, 2) === '--') {
                 $seperation = explode("=", substr($argument, 2));
-                $array[$seperation[0]] = $seperation[1];
+                $array[$seperation[0]] = isset($seperation[1]) ? $seperation[1] : null;
             }
         }
 

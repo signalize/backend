@@ -13,11 +13,14 @@ class Installer extends Base
         exec("php composer.phar search signalize -t signalize-module", $availablePackages);
         exec("php composer.phar show -N", $installedPackages);
 
+        $availablePackages = array_unique($availablePackages);
         Cache::save('service-available-packages', array_map(function ($package) use ($installedPackages) {
+            $packageName = trim(substr($package, strpos($package, " ")));
+            $packageUrl = trim(substr($package, 0, strpos($package, " ")));
             return [
-                "name" => trim(substr($package, strpos($package, " "))),
-                "package" => trim(substr($package, 0, strpos($package, " "))),
-                "status" => (in_array($package, $installedPackages) ? "Installed" : "Not Installed")
+                "name" => $packageName,
+                "package" => $packageUrl,
+                "status" => (in_array($packageName, $installedPackages) ? "Installed" : "Not Installed")
             ];
         }, $availablePackages));
 
