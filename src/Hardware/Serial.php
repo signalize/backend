@@ -2,7 +2,7 @@
 
 namespace Signalize\Hardware;
 
-use Signalize\Service\Package;
+use Signalize\Socket\Package;
 
 abstract class Serial
 {
