@@ -7,59 +7,52 @@ use Ratchet\ConnectionInterface;
 class Connection
 {
     /** @var ConnectionInterface $connection */
-    private $connection;
-    /** @var bool $authorized */
-    private $authorized = false;
+    public $connection;
+
+    /** @var Session $session */
+    public $session = null;
+
+    /** @var Parameters $parameters */
+    public $parameters = null;
 
     /**
      * Connection constructor.
      * @param ConnectionInterface $connection
+     * @throws \Exception
      */
     public function __construct(ConnectionInterface $connection)
     {
         $this->connection = $connection;
+        $this->parameters = new Parameters($connection);
+        $this->session = new Session($this);
     }
 
     /**
      * @param ConnectionInterface $conn
      * @return bool
      */
-    public function isConnection(ConnectionInterface $conn): bool
+    public function isConnection(ConnectionInterface $conn)
     {
-        return $conn === $this->connection;
+        return ($this->connection === $conn);
+    }
+
+    public function sameAs(Connection $connection)
+    {
+        return $this->session->id() === $connection->session->id();
     }
 
     /**
-     * @return bool
+     * @param Message $message
      */
-    public function authorized(): bool
+    public function send(Message $message): void
     {
-        return $this->authorized;
+        $this->connection->send($message);
     }
 
     /**
-     * @param bool $value
+     *
      */
-    public function authorize(bool $value)
-    {
-        $this->authorized = $value;
-    }
-
-    /**
-     * @param string $data
-     */
-    public function send(string $service, $data)
-    {
-        try {
-            if (is_object($data) || is_array($data)) {
-                $data = json_encode($data);
-            }
-            $this->connection->send("/" . $service . "\r\n\r\n" . $data);
-        } catch (\Exception $e) {
-        }
-    }
-
-    public function close()
+    public function close(): void
     {
         $this->connection->close();
     }

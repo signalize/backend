@@ -2,7 +2,7 @@
 
 namespace Signalize\Service;
 
-use Signalize\Config;
+use Signalize\Socket\Socket;
 
 class Manager
 {
@@ -65,7 +65,7 @@ class Manager
             return $service;
         }
 
-        $pid = exec("vendor/bin/" . $service . " --worker > /dev/null 2>&1 & echo $!;");
+        $pid = exec("vendor/bin/" . $service . " --SID=" . Socket::token(mktime()) . " --worker > /dev/null 2>&1 & echo $!;");
         sleep(1);
         $this->services = $this->loadProcesses();
 

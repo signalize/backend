@@ -2,17 +2,13 @@
 
 namespace Signalize\Service;
 
-use Composer\Script\Event;
-use Signalize\Socket\Socket;
-use WebSocket\Client;
-
-use Signalize\Config;
+use Signalize\Socket\Client;
+use Signalize\Socket\Package;
 
 abstract class Base
 {
-    /** @var Client $socket */
-    private $socket;
-
+    /** @var array */
+    protected $parameters;
 
     /**
      * @return void
@@ -20,55 +16,65 @@ abstract class Base
     abstract public function worker();
 
     /**
-     * @param string $data
-     * @return void
+     * @param Package $package
+     * @return Package|mixed
      */
-    abstract function execute(string $data);
+    abstract function execute(Package $package);
 
     /**
      * Base constructor.
-     * @throws \WebSocket\BadOpcodeException
      */
     public function __construct()
     {
-        # Check Arguments is Available
-        if (!isset($_SERVER['argv'][1])) {
-            die("Cannot execute the service. Maybe you forgot some arguments?");
-        }
-        $property = $_SERVER['argv'][1];
+        try {
+            $this->parameters = new Parameters($_SERVER['argv']);
+            switch (true) {
+                case $this->parameters->offsetExists('worker'):
+                    $this->worker();
+                    break;
+                case $this->parameters->offsetExists('package'):
+                    try {
+                        $package = base64_decode($this->parameters->offsetGet('package'));
+                        if (($package = json_decode($package)) !== null) {
+                            $package = new Package($package);
+                            if ($response = $this->execute($package)) {
+                                $this->respond($response);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        $this->respond(new Package([
+                            'code' => $e->getCode(),
+                            'message' => $e->getMessage()
+                        ]));
+                    }
+                    break;
+            }
 
-        # Setup the WebSocket Connection
-        $this->socket = new Client('ws://127.0.0.1:' . Config::get('socket')->port);
-        $this->socket->send("/authenticate\n\n" . Socket::token());
-        if (!$this->socket->isConnected()) {
-            die('Not possible to connect to the websocket!');
-        }
-
-        # Check wich command has to be executed
-        switch (true) {
-            # Run the worker
-            case ($property === "--worker"):
-                $this->worker();
-                break;
-            # Execute, to process input
-            case (substr($property, 0, 7) === '--data='):
-                $data = base64_decode(substr($property, 7));
-                $this->execute($data);
-                break;
+        } catch (\Exception $e) {
+            die($e->getMessage());
         }
     }
 
     /**
-     * @param string $command
-     * @param mixed $package
-     * @return bool
+     * @param Package $package
+     * @throws \WebSocket\BadOpcodeException
      */
     protected function send(Package $package)
     {
-        if (!$this->socket->isConnected()) {
-            $this->__construct();
-        }
+        $socket = new Client($this->parameters->offsetGet('SID'), 'push');
+        $socket->push($package);
+        $socket->close();
+    }
 
-        $this->socket->send("/" . basename($_SERVER['SCRIPT_NAME']) . "\n\n" . $package);
+
+    /**
+     * @param Package $response
+     * @throws \WebSocket\BadOpcodeException
+     */
+    protected function respond(Package $response)
+    {
+        $socket = new Client($this->parameters->offsetGet('SID'), 'response');
+        $socket->push($response);
+        $socket->close();
     }
 }

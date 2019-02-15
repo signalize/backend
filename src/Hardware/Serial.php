@@ -13,7 +13,7 @@ abstract class Serial
     /**
      * @param string $chuck
      * @param string $buffer
-     * @return Package|bool
+     * @return mixed
      */
     abstract function process(string $chuck, string $buffer);
 

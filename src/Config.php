@@ -39,12 +39,4 @@ class Config
             return false;
         });
     }
-
-    /**
-     * @return array
-     */
-    static public function modules(): array
-    {
-        return [];
-    }
 }
