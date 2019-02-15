@@ -21,6 +21,7 @@
   ],
   "bin": [
     "bin/service-manager",
-    "bin/service-socket"
+    "bin/service-socket",
+    "bin/service-installer"
   ]
 }
