@@ -20,7 +20,7 @@ class Installer extends Base
             return [
                 "name" => $packageName,
                 "package" => $packageUrl,
-                "status" => (in_array($packageName, $installedPackages) ? "Installed" : "Not Installed")
+                "status" => (in_array($packageUrl, $installedPackages) ? "Installed" : "Not Installed")
             ];
         }, $availablePackages));
 
