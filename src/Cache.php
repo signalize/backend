@@ -26,7 +26,7 @@ class Cache
         if ($json = @json_decode($data)) {
             return $json;
         }
-        return $data;
+        return [];
     }
 
     /**
