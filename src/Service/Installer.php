@@ -10,20 +10,7 @@ class Installer extends Base
     /** */
     public function worker()
     {
-        exec("php composer.phar search signalize -t signalize-module", $availablePackages);
-        exec("php composer.phar show -N", $installedPackages);
-
-        $availablePackages = array_unique($availablePackages);
-        Cache::save('service-available-packages', array_map(function ($package) use ($installedPackages) {
-            $packageName = trim(substr($package, strpos($package, " ")));
-            $packageUrl = trim(substr($package, 0, strpos($package, " ")));
-            return [
-                "name" => $packageName,
-                "package" => $packageUrl,
-                "status" => (in_array($packageUrl, $installedPackages) ? "Installed" : "Not Installed")
-            ];
-        }, $availablePackages));
-
+        $this->savePackages();
         sleep(60);
     }
 
@@ -123,5 +110,21 @@ class Installer extends Base
         return count(array_filter($availablePackages, function ($p) use ($packageName) {
                 return $p->package === $packageName;
             })) > 0;
+    }
+
+    private function savePackages()
+    {
+        exec("php composer.phar search signalize -t signalize-module", $availablePackages);
+        exec("php composer.phar show -N", $installedPackages);
+
+        Cache::save('service-available-packages', array_map(function ($package) use ($installedPackages) {
+            $packageName = trim(substr($package, strpos($package, " ")));
+            $packageUrl = trim(substr($package, 0, strpos($package, " ")));
+            return [
+                "name" => $packageName,
+                "package" => $packageUrl,
+                "status" => (in_array($packageUrl, $installedPackages) ? "Installed" : "Not Installed")
+            ];
+        }, array_unique($availablePackages)));
     }
 }
