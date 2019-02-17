@@ -1,3 +1,7 @@
+import {Socket} from "./socket.js";
+
+const socket = new Socket();
+
 export class Widget extends HTMLElement {
     static service = null;
 
@@ -9,17 +13,13 @@ export class Widget extends HTMLElement {
         let cache = null;
         try {
             cache = JSON.parse(localStorage.getItem(widget.service));
-        } catch(e) {
+        } catch (e) {
         }
         self.innerHTML = widget.render(cache);
 
         if (widget.service) {
-            let socketAddress = 'ws://' + window.location.host + ':' + window.location.port + '/sock/';
-            socketAddress += '?SID=0FB1CF9AAB460F7834CB248B4DDFA1FDC9A804C7.1550220392';
-
-            const socket = new WebSocket(socketAddress);
             socket.addEventListener('message', function (event) {
-                let message = self.decode(event.data);
+                let message = Widget.decode(event.data);
                 if (message.service === widget.service) {
                     localStorage.setItem(message.service, JSON.stringify(message.package));
                     self.innerHTML = widget.render(message.package);
