@@ -7,7 +7,6 @@ use Signalize\Socket\Package;
 abstract class Serial
 {
     private $fp;
-    private $size;
 
 
     /**
@@ -22,10 +21,9 @@ abstract class Serial
      * @param string $device
      * @param int $size
      */
-    public function __construct(string $device, int $size)
+    public function __construct(string $device)
     {
-        $this->fp = fopen($device, "r+");
-        $this->size = $size;
+        $this->fp = fopen($device, "w+b");
     }
 
     /**
@@ -34,13 +32,14 @@ abstract class Serial
     public function subscribe(callable $method)
     {
         $buffer = null;
-        while ($chuck = fgets($this->fp, $this->size)) {
+        while ($chuck = fgets($this->fp, 256)) {
             if (trim($chuck)) {
                 $buffer .= $chuck;
                 if ($package = $this->process($chuck, trim($buffer))) {
                     if (is_a($package, Package::class)) {
                         /** @var Package $package */
                         $method($package);
+                        $buffer = null;
                     }
                 } else {
                     $buffer = null;
