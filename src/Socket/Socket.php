@@ -65,6 +65,7 @@ class Socket implements MessageComponentInterface
                 $conn->send("HELO");
                 return;
             }
+
             # Get current connection
             $connection = $this->getConnection($conn);
 
@@ -75,7 +76,11 @@ class Socket implements MessageComponentInterface
             $msg = $this->decode($msg);
 
             # Subscribe to the called service
-            $connection->subscribe($msg->service());
+            if (isset($msg->package()['subscribe']) && $msg->package()['subscribe'] === false) {
+                $connection->unsubscribe($msg->service());
+            } else {
+                $connection->subscribe($msg->service());
+            }
 
 
             $type = $connection->parameters->offsetGet('type');
