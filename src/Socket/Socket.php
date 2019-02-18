@@ -67,17 +67,15 @@ class Socket implements MessageComponentInterface
             }
             # Get current connection
             $connection = $this->getConnection($conn);
-            if (substr($msg, 0, 10) === 'SUBSCRIBE:') {
-                $connection->subscribe(substr($msg, 10));
-                return;
-            }
-
 
             # Validate current session
             $connection->session->validate();
 
             # Validate and decode the received package
             $msg = $this->decode($msg);
+
+            # Subscribe to the called service
+            $connection->subscribe($msg->service());
 
 
             $type = $connection->parameters->offsetGet('type');
