@@ -15,6 +15,8 @@ class Connection
     /** @var Parameters $parameters */
     public $parameters = null;
 
+    public $subscriptions = [];
+
     /**
      * Connection constructor.
      * @param ConnectionInterface $connection
@@ -41,12 +43,24 @@ class Connection
         return $this->session->id() === $connection->session->id();
     }
 
+    public function subscribe($service)
+    {
+        $this->subscriptions[$service] = true;
+    }
+
+    public function unsubscribe($service)
+    {
+        $this->subscriptions[$service] = false;
+    }
+
     /**
      * @param Message $message
      */
     public function send(Message $message)
     {
-        $this->connection->send($message);
+        if (array_key_exists($message->service(), $this->subscriptions)) {
+            $this->connection->send($message);
+        }
     }
 
     /**

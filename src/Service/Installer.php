@@ -46,7 +46,7 @@ class Installer extends Base
      */
     private function list(): Package
     {
-        $packages = Cache::get('service-available-packages');
+        $packages = Cache::open('service-available-packages');
         return new Package($packages);
     }
 

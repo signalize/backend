@@ -20,7 +20,7 @@ class Cache
      * @param string $filename
      * @return mixed
      */
-    static public function get($filename)
+    static public function open($filename)
     {
         $data = file_get_contents(self::path($filename));
         if ($json = @json_decode($data)) {
@@ -28,6 +28,20 @@ class Cache
         }
         return json_decode("{}");
     }
+
+    static public function set($filename, $property, $value)
+    {
+        $file = self::open($filename);
+        $file->{$property} = $value;
+        self::save($filename, $file);
+    }
+
+    static public function get($filename, $property)
+    {
+        $file = self::open($filename);
+        return $file->{$property};
+    }
+
 
     /**
      * @param string $filename

@@ -67,6 +67,11 @@ class Socket implements MessageComponentInterface
             }
             # Get current connection
             $connection = $this->getConnection($conn);
+            if (substr($msg, 0, 10) === 'SUBSCRIBE:') {
+                $connection->subscribe(substr($msg, 10));
+                return;
+            }
+
 
             # Validate current session
             $connection->session->validate();
