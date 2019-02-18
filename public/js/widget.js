@@ -18,6 +18,7 @@ export class Widget extends HTMLElement {
         self.innerHTML = widget.render(cache);
 
         if (widget.service) {
+            Widget.send(widget.service, {subscribe: true});
             socket.addEventListener('message', function (event) {
                 let message = Widget.decode(event.data);
                 if (message.service === widget.service) {
@@ -54,5 +55,9 @@ export class Widget extends HTMLElement {
             }
         });
         return str;
+    }
+
+    static send(service, pkg) {
+        socket.send('/ ' + service + "\r\n\r\n" + JSON.stringify(pkg));
     }
 }
