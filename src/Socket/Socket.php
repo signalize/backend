@@ -82,8 +82,10 @@ class Socket implements MessageComponentInterface
                 $connection->subscribe($msg->service());
             }
 
-
-            $type = $connection->parameters->offsetGet('type');
+            $type = null;
+            if ($connection->parameters->offsetExists('type')) {
+                $type = $connection->parameters->offsetGet('type');
+            }
             switch ($type) {
                 case "response":
                     /** @var Connection $conn */

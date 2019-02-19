@@ -45,7 +45,7 @@ class Connection
 
     public function subscribe($service)
     {
-        if (!$this->subscriptions[$service]) {
+        if (!isset($this->subscriptions[$service])) {
             $this->connection->send('Subscribed to Service [' . $service . ']');
         }
         $this->subscriptions[$service] = true;
@@ -53,7 +53,7 @@ class Connection
 
     public function unsubscribe($service)
     {
-        if ($this->subscriptions[$service]) {
+        if (isset($this->subscriptions[$service])) {
             $this->connection->send('Unsubscribed from Service [' . $service . ']');
         }
         $this->subscriptions[$service] = false;
